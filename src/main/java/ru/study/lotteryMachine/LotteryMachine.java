@@ -2,17 +2,18 @@ package ru.study.lotteryMachine;
 
 import ru.study.prize.Prize;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
+import java.util.LinkedList;
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
 
 public class LotteryMachine {
     private MachineStorage storage;
     private Queue<Prize> prizeDistribution;
     public LotteryMachine() {
         this.storage = new MachineStorage();
-        // init prizes out queue
+        this.prizeDistribution = new LinkedList<>();
     }
 
     public void LoadPrizes(Prize prize, int probability, int amount) {
@@ -51,23 +52,40 @@ public class LotteryMachine {
             storageID = gambleResult.get(0);
         }
         if (storageID != null) {
-            Prize prize = storage.getPrize(storageID);
-            // no null check, if we end up here, then prize obj must exist in storage and this was checked earlier
-            // and put it in distribution queue
+            prizeDistribution.add(storage.getPrize(storageID));
         }
     }
+
+    /**
+     * get one prize from distribution
+     */
     public Prize getPrize() {
-        // get one prize from distribution (or null)
-        return null;
+        return prizeDistribution.poll();
     }
-    public List<Prize> getPrizes() {
-        // get all prizes from distribution queue (can return empty list)
-        return new ArrayList<Prize>();
-    }
+
+    /**
+     * get N prizes from distribution <br>
+     * will return as many prizes as requested or as available in distribution
+     * @param number if prizes to get
+     */
     public List<Prize> getPrizes(int number) {
-        // get $number prizes from distribution queue (can return empty list or list with less size that requested)
-        return new ArrayList<Prize>();
+        List<Prize> result = new ArrayList<>();
+        Prize prize = getPrize();
+        while (prize != null && number > 0) {
+            result.add(prize);
+            prize = getPrize();
+            number--;
+        }
+        return result;
     }
+
+    /**
+     * get all prizes from distribution
+     */
+    public List<Prize> getPrizes() {
+        return getPrizes(prizeDistribution.size());
+    }
+
     private void logAction() {
         // callback to any external logging mechanism
         // to be described later
