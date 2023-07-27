@@ -3,29 +3,33 @@ package ru.study.lotteryMachine;
 import ru.study.prize.Prize;
 
 public class LotteryElement {
-    private Prize element;
+    private Prize prize;
     private int probability;
-    private int elementsAmount;
+    private int amount;
 
-    public LotteryElement(Prize element, int probability, int amount) {
-        this.element = element;
+    public LotteryElement(Prize prize, int probability, int amount) {
+        this.prize = prize;
         this.probability = probability;
-        this.elementsAmount = amount;
+        this.amount = amount;
     }
 
-    public Prize getElement() {
-        return element;
+    public Prize getPrize() {
+        return prize;
     }
 
-    public int getElementsAmount() {
-        return elementsAmount;
+    public int getAmount() {
+        return amount;
     }
 
     public int getProbability() {
         return probability;
     }
 
-    public void setElementsAmount(int elementsAmount) {
-        this.elementsAmount = elementsAmount;
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
+
+    public void setProbability(int probability) {
+        this.probability = probability;
     }
 }
