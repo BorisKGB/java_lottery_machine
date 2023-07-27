@@ -5,6 +5,7 @@ import ru.study.prize.Prize;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 
 public class LotteryMachine {
     private MachineStorage storage;
@@ -22,14 +23,38 @@ public class LotteryMachine {
             storage.loadPrize(prize, 30, amount);
         }
     }
+
+    private static int randNumber(int min, int max) {
+        Random rand = new Random();
+        return rand.nextInt((max - min)+1) + min;
+    }
+
+    /**
+     * get element probabilities from storage <br>
+     * choose prizes that satisfy chosen number <br>
+     * if there is more than one prize, pick random prize from chosen
+     * if Prize was chosen move it to prizeDistribution Queue
+     */
     public void Gamble() {
-        // before gamble check available prizes
         List<Integer> gambleData = storage.getElementsProbability();
-        // on win condition
-        int storageID = 0;
-        Prize prize = storage.getPrize(storageID);
-        // no null check, if we end up here, then prize obj must exist in storage and this was checked earlier
-        // and put it in distribution queue
+        int gambleChoice = randNumber(1, 100);
+        List<Integer> gambleResult = new ArrayList<>();
+        for (int i=0; i<gambleData.size(); i++) {
+            if (gambleData.get(i) >= gambleChoice) {
+                gambleResult.add(i);
+            }
+        }
+        Integer storageID = null;
+        if (gambleResult.size() > 1) {
+            storageID = gambleResult.get(randNumber(0, gambleResult.size()-1));
+        } else if (gambleResult.size() == 1) {
+            storageID = gambleResult.get(0);
+        }
+        if (storageID != null) {
+            Prize prize = storage.getPrize(storageID);
+            // no null check, if we end up here, then prize obj must exist in storage and this was checked earlier
+            // and put it in distribution queue
+        }
     }
     public Prize getPrize() {
         // get one prize from distribution (or null)
