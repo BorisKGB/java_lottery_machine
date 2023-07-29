@@ -1,5 +1,6 @@
 package ru.study.lotteryMachine;
 
+import ru.study.customLog.CustomLog;
 import ru.study.prize.Prize;
 
 import java.util.Queue;
@@ -11,16 +12,19 @@ import java.util.ArrayList;
 public class LotteryMachine {
     private MachineStorage storage;
     private Queue<Prize> prizeDistribution;
+    private CustomLog log;
     public LotteryMachine() {
         this.storage = new MachineStorage();
         this.prizeDistribution = new LinkedList<>();
+        this.log = CustomLog.getInstance();
     }
 
     public void LoadPrizes(Prize prize, int probability, int amount) {
+        log.info(String.format("Запрошена загрузка %d призов '%s' с вероятностью %d%%", amount, prize.getName(), probability));
         if (probability > 0 && probability <= 100) {
             storage.loadPrize(prize, probability, amount);
         } else {
-            System.out.printf("WARN: incorrect probability '%d', will be set to '30'\n", probability);
+            log.warn(String.format("Запрошенная вероятность '%d' превышает допустимую, вероятность выставлена в 30%%", probability));
             storage.loadPrize(prize, 30, amount);
         }
     }
@@ -37,6 +41,7 @@ public class LotteryMachine {
      * if Prize was chosen move it to prizeDistribution Queue
      */
     public void Gamble() {
+        log.info("Запрошен розыгрыш");
         List<Integer> gambleData = storage.getElementsProbability();
         int gambleChoice = randNumber(1, 100);
         List<Integer> gambleResult = new ArrayList<>();
@@ -45,6 +50,7 @@ public class LotteryMachine {
                 gambleResult.add(i);
             }
         }
+        if (gambleData.isEmpty()) log.warn("Нет призов для розыгрыша");
         Integer storageID = null;
         if (gambleResult.size() > 1) {
             storageID = gambleResult.get(randNumber(0, gambleResult.size()-1));
@@ -52,7 +58,11 @@ public class LotteryMachine {
             storageID = gambleResult.get(0);
         }
         if (storageID != null) {
-            prizeDistribution.add(storage.getPrize(storageID));
+            Prize prize = storage.getPrize(storageID);
+            log.info(String.format("Результат розыгрыша '%s', добавлен в очередь на выдачу", prize.getName()));
+            prizeDistribution.add(prize);
+        } else {
+            log.info("Результат розыгрыша 'ничего'");
         }
     }
 
@@ -60,7 +70,13 @@ public class LotteryMachine {
      * get one prize from distribution
      */
     public Prize getPrize() {
-        return prizeDistribution.poll();
+        Prize prize = prizeDistribution.poll();
+        if (prize != null) {
+            log.info(String.format("Выдан приз '%s'", prize.getName()));
+        } else {
+            log.info("Запрошена выдача приза, нет призов в очереди на раздачу, ничего не выдано");
+        }
+        return prize;
     }
 
     /**
@@ -84,10 +100,5 @@ public class LotteryMachine {
      */
     public List<Prize> getPrizes() {
         return getPrizes(prizeDistribution.size());
-    }
-
-    private void logAction() {
-        // callback to any external logging mechanism
-        // to be described later
     }
 }
