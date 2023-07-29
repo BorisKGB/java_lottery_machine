@@ -71,7 +71,7 @@ public class CustomLog {
     public void log(LogLevel level, String message) {
         String logMessage = String.format("%s - %s - %s\n", this.time, level.toString(), message);
         if (this.writeToConsole) {
-            System.out.printf(logMessage);
+            System.out.print(logMessage);
         }
         if (this.writeToFile) {
             try {
@@ -91,7 +91,7 @@ public class CustomLog {
     public void warn(String message) {log(LogLevel.WARN, message);}
 
     public void setTime(int hour, int minute) {
-        this.time = LocalTime.parse(String.format("%d:%d", hour, minute));
+        this.time = LocalTime.parse(String.format("%02d:%d", hour, minute));
     }
     public int getHour() {
         return time.getHour();

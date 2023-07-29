@@ -5,9 +5,10 @@ import ru.study.prize.Prize;
 
 import java.util.Queue;
 import java.util.LinkedList;
-import java.util.Random;
 import java.util.List;
 import java.util.ArrayList;
+
+import static ru.study.Main.randNumber;
 
 public class LotteryMachine {
     private MachineStorage storage;
@@ -19,7 +20,7 @@ public class LotteryMachine {
         this.log = CustomLog.getInstance();
     }
 
-    public void LoadPrizes(Prize prize, int probability, int amount) {
+    public void loadPrizes(Prize prize, int probability, int amount) {
         log.info(String.format("Запрошена загрузка %d призов '%s' с вероятностью %d%%", amount, prize.getName(), probability));
         if (probability > 0 && probability <= 100) {
             storage.loadPrize(prize, probability, amount);
@@ -27,11 +28,6 @@ public class LotteryMachine {
             log.warn(String.format("Запрошенная вероятность '%d' превышает допустимую, вероятность выставлена в 30%%", probability));
             storage.loadPrize(prize, 30, amount);
         }
-    }
-
-    private static int randNumber(int min, int max) {
-        Random rand = new Random();
-        return rand.nextInt((max - min)+1) + min;
     }
 
     /**
