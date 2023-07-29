@@ -1,12 +1,29 @@
 package ru.study.customLog;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.regex.Pattern;
 
 public class CustomLog {
     private static CustomLog instance = null;
     private LocalTime time;
+    private boolean writeToFile;
+    private String filePath;
+    private FileWriter fileWriter;
+    private boolean writeToConsole;
+
     private CustomLog() {
         this.time = LocalTime.parse("09:00");
+        this.writeToFile = false;
+        this.filePath = String.join(File.separator, Arrays.asList("data", "app.log"));
+        this.fileWriter = null;
+        this.writeToConsole = false;
     }
     public static CustomLog getInstance() {
         if (instance == null) {
@@ -15,8 +32,59 @@ public class CustomLog {
         return instance;
     }
 
+    public void setWriteToConsole() {
+        this.writeToConsole = true;
+    }
+    public void unsetWriteToConsole() {
+        this.writeToConsole = false;
+    }
+
+    private void ensureParentDirectories() throws IOException {
+        String[] pathElements = Paths.get(this.filePath).getParent().toString().split(Pattern.quote(File.separator));
+        Files.createDirectories(Paths.get(String.join(File.separator, pathElements)));
+    }
+    private void openFile() throws IOException {
+        this.fileWriter = new FileWriter(this.filePath, StandardCharsets.UTF_8,true);
+    }
+
+    public void setWriteToFile(String filePath) {
+        if (!filePath.equals(this.filePath)){
+            this.filePath = filePath;
+        }
+        try {
+            ensureParentDirectories();
+            this.openFile();
+        } catch (IOException e) {
+            unsetWriteToFile();
+            this.log(LogLevel.WARN, "Unable to log to file, disabling feature");
+        }
+        this.writeToFile = true;
+    }
+    public void setWriteToFile() {
+        setWriteToFile(this.filePath);
+    }
+    public void unsetWriteToFile() {
+        this.writeToFile = false;
+        this.fileWriter = null;
+    }
+
     public void log(LogLevel level, String message) {
-        // some log action
+        String logMessage = String.format("%s - %s - %s\n", this.time, level.toString(), message);
+        if (this.writeToConsole) {
+            System.out.printf(logMessage);
+        }
+        if (this.writeToFile) {
+            try {
+                if (this.fileWriter == null) {
+                    this.openFile();
+                }
+                this.fileWriter.write(logMessage);
+                this.fileWriter.flush();
+            } catch (IOException e) {
+                unsetWriteToFile();
+                this.log(LogLevel.WARN, "Unable to log to file, disabling feature");
+            }
+        }
     }
 
     public void info(String message) {log(LogLevel.INFO, message);}
